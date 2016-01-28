@@ -7,14 +7,23 @@ const Random = require("random-js")
 const engine = Random.engines.nativeMath
 
 class Multicolour_Seed {
+  /**
+   * Set some defaults.
+   * @return {void}
+   */
   constructor() {
-    this.set_iterations(10)
-
+    // Set iterations to a default.
+    this.set_iterations(20)
     this.models_payloads = {}
   }
 
+  /**
+   * Set how many of each model you want to automatically create.
+   * @param {Number} iterations to seed.
+   */
   set_iterations(iterations) {
     this.iterations = Number(iterations)
+    return this
   }
 
   /**
@@ -23,6 +32,8 @@ class Multicolour_Seed {
    * @return {void}
    */
   register(multicolour) {
+    multicolour.reply("seeder", this)
+
     // When the server starts, try and seed.
     multicolour.on("server_starting", () => {
       // If we're not in development mode, do NOT
@@ -41,9 +52,11 @@ class Multicolour_Seed {
   }
 
   /**
-   * Get the models and generate a few payloads
-   * @param  {[type]} multicolour [description]
-   * @return {[type]}             [description]
+   * Get the models and generate a N payloads
+   * in the database.
+   *
+   * @param  {Multicolour} multicolour instance running.
+   * @return {void}
    */
   get_models_and_seed(multicolour) {
     // Get the registered models.
@@ -93,6 +106,13 @@ class Multicolour_Seed {
     })
   }
 
+  /**
+   * Use the attributes of a model to generate
+   * a random payload to write to the database.
+   *
+   * @param  {Object} definition in the blueprint.
+   * @return {Object} valid payload to write to the database.
+   */
   generate_payload_from_definition(definition) {
     // Start with an empty object.
     const payload = {}
@@ -139,6 +159,14 @@ class Multicolour_Seed {
     return payload
   }
 
+  /**
+   * Generate a date between the blueprint
+   * definitions or up to 10 years ago or
+   * 10 years into the future (arbitrary.)
+   *
+   * @param  {Object} attribute to generate from.
+   * @return {Date} Random date.
+   */
   generate_date(attribute) {
     // Create some default dates.
     const current_date = new Date()
@@ -152,6 +180,16 @@ class Multicolour_Seed {
     )(engine)
   }
 
+  /**
+   * Generate a date between the blueprint
+   * definitions or between positive/negative
+   * Number.MAX_SAFE_INTEGER.
+   *
+   * Will generate a float or an integer.
+   *
+   * @param  {Object} attribute to generate from.
+   * @return {Number} Random number.
+   */
   generate_number(attribute) {
     // Get the range
     const min = attribute.min || -Number.MAX_SAFE_INTEGER
@@ -167,6 +205,15 @@ class Multicolour_Seed {
     }
   }
 
+  /**
+   * Generate a random string to the length
+   * described in the blueprint or 255 characters.
+   *
+   * Respects, url, email & urlish
+   *
+   * @param  {Object} attribute to generate from.
+   * @return {String} Random string.
+   */
   generate_string(attribute) {
     // If it's an enum, return a random value of it.
     if (attribute.enum) {
@@ -196,4 +243,5 @@ class Multicolour_Seed {
   }
 }
 
+// Export the tool.
 module.exports = Multicolour_Seed
