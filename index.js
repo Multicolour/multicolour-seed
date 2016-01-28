@@ -6,6 +6,9 @@
 const Random = require("random-js")
 const engine = Random.engines.nativeMath
 
+// Get Async.
+const Async = require("async")
+
 class Multicolour_Seed {
   /**
    * Set some defaults.
@@ -40,10 +43,13 @@ class Multicolour_Seed {
       // seed the database, that would be bad mkay?
       if (!process.env.NODE_ENV || process.env.NODE_ENV.toLowerCase() !== "development") {
         /* eslint-disable */
-        console.log(`NODE_ENV is not "development", not seeding the database`)
+        console.error(`NODE_ENV is not "development", not seeding the database`)
         /* eslint-enable */
       }
       else {
+        /* eslint-disable */
+        console.log("- Seeding the database with fake data.")
+        /* eslint-enable */
         // Otherwise, get the models and seed the
         // database with some random stuff.
         this.get_models_and_seed(multicolour)
@@ -61,9 +67,6 @@ class Multicolour_Seed {
   get_models_and_seed(multicolour) {
     // Get the registered models.
     const models = multicolour.get("database").get("models")
-
-    // Get Async.
-    const Async = require("async")
 
     // Loop over each model.
     Object.keys(models).forEach(model_name => {
@@ -84,25 +87,74 @@ class Multicolour_Seed {
           payloads.push(this.generate_payload_from_definition(model._attributes))
         }
 
+        // Add the payloads.
         this.models_payloads[model_name] = payloads
       }
     })
 
-    // console.log(this.models_payloads);
-
+    // Create the tasks to run on the database.
     const tasks = Object.keys(this.models_payloads)
-      .map(model_name => next => models[model_name].create(this.models_payloads[model_name], next))
+      .map(model_name =>
+        // Create a wrapper function for Async to execute.
+        next =>
+          models[model_name].create(
+            this.models_payloads[model_name], (err, created) => next(err, model_name, created)
+          ))
 
     // Do the database work.
     Async.parallel(tasks, (err, created) => {
       if (err) {
-        console.error(" - SEED - Finished seeding the database with an error")
-        console.error(" - SEED - ", err)
+        /* eslint-disable */
+        console.error("- SEED - Finished seeding the database with an error")
+        console.error("- SEED - ", err)
+        /* eslint-enable */
       }
       else {
-        console.log(" - SEED - Finished seeding the database with random data.")
-        console.log(created);
+        // Resolve and update all created associative models.
+        this.resolve_and_make_associations(created, models)
       }
+    })
+  }
+
+  resolve_and_make_associations(created, models) {
+    // Create a map from the created array.
+    const mapped_created = new Map(created)
+
+    // Loop over the models and make the associations.
+    Object.keys(models).forEach(model_name => {
+      const model = models[model_name]
+
+      // Skip junction tables.
+      if (model.meta.junctionTable) {
+        return
+      }
+
+      // Loop over each created model.
+      mapped_created.get(model_name).forEach(created_model => {
+        Object.keys(model._attributes)
+          .filter(attribute_name =>
+              model._attributes[attribute_name].model || model._attributes[attribute_name].collection)
+          .map(attribute_name => {
+            const attribute = model._attributes[attribute_name]
+
+            // If it has a model association grab a random one.
+            if (attribute.model) {
+              model.update({ id: created_model.id }, {
+                [attribute.model]: Random.pick(engine, mapped_created.get(attribute.model)).id
+              }, () => {})
+            }
+            // Otherwise, grab a few random ones.
+            else if (attribute.collection) {
+              model.update({ id: created_model.id }, {
+                [attribute.collection]: [
+                  Random.pick(engine, mapped_created.get(attribute.collection)).id,
+                  Random.pick(engine, mapped_created.get(attribute.collection)).id,
+                  Random.pick(engine, mapped_created.get(attribute.collection)).id
+                ]
+              }, () => {})
+            }
+          })
+      })
     })
   }
 
@@ -192,8 +244,8 @@ class Multicolour_Seed {
    */
   generate_number(attribute) {
     // Get the range
-    const min = attribute.min || -Number.MAX_SAFE_INTEGER
-    const max = attribute.max || Number.MAX_SAFE_INTEGER
+    const min = attribute.hasOwnProperty("min") ? attribute.min : -Number.MAX_SAFE_INTEGER
+    const max = attribute.hasOwnProperty("max") ? attribute.max : Number.MAX_SAFE_INTEGER
 
     // If it's a float, generate that.
     if (attribute.type === "float" || attribute.float) {
@@ -215,20 +267,25 @@ class Multicolour_Seed {
    * @return {String} Random string.
    */
   generate_string(attribute) {
+    // get the range.
+    const min = attribute.hasOwnProperty("minLength") ? attribute.minLength : 50
+    const max = attribute.hasOwnProperty("maxLength") ? attribute.maxLength : 255
+
     // If it's an enum, return a random value of it.
     if (attribute.enum) {
       return Random.pick(engine, attribute.enum)
     }
 
     // Generate a string.
-    const long_random_string = Random.string()(engine, attribute.maxLength || 255)
-    const short_random_string = Random.string()(engine, attribute.maxLength || 50)
+    const long_random_string = Random.string()(engine, max)
+    const short_random_string = Random.string()(engine, min)
 
+    // Is it an email address?
     if (attribute.type === "email" || attribute.email) {
       return `${short_random_string}@${short_random_string}.com`.replace(/(_|-)/gi, "")
     }
 
-    // is it a url?
+    // Is it a url?
     if (attribute.url) {
       return `http://${short_random_string}.com`.replace(/(_|-)/gi, "")
     }
