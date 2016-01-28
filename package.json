@@ -1,0 +1,16 @@
+{
+  "name": "multicolour-seed",
+  "version": "0.0.1",
+  "description": "Seed your development environment with dummy data randomly generated.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "newworldcode <hello@newworld.codes>",
+  "license": "MIT",
+  "dependencies": {
+    "async": "^1.5.2",
+    "multicolour": "^0.2.7",
+    "random-js": "^1.0.8"
+  }
+}
