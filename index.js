@@ -116,6 +116,12 @@ class Multicolour_Seed {
     })
   }
 
+  /**
+   * Make some fake associations.
+   * @param  {Array} created records to create Map from.
+   * @param  {Object} models to associate.
+   * @return {void}
+   */
   resolve_and_make_associations(created, models) {
     // Create a map from the created array.
     const mapped_created = new Map(created)
