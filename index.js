@@ -250,8 +250,49 @@ class Multicolour_Seed {
    */
   generate_number(attribute) {
     // Get the range
-    const min = attribute.hasOwnProperty("min") ? attribute.min : -Number.MAX_SAFE_INTEGER
-    const max = attribute.hasOwnProperty("max") ? attribute.max : Number.MAX_SAFE_INTEGER
+    const size = attribute.hasOwnProperty("size") ? attribute.size : 64
+    let safe = 32767
+
+    // Calculate the safe max/min size for integers.
+    // Check for a size.
+    if (attribute.hasOwnProperty("size")) {
+      switch (size) {
+      default:
+      case (size < 16):
+        safe = 32767
+        break
+      case (size >= 16 && size <= 32):
+        safe = 2147483647
+        break
+      case (size >= 32 && size <= 64):
+        safe = Number.MAX_SAFE_INTEGER
+        break
+      }
+    }
+    // Otherwise, check for the type.
+    else if (attribute.hasOwnProperty("type")) {
+      switch (attribute.type) {
+      case "smallint":
+        safe = 32767
+        break
+      case "integer":
+      case "serial":
+        safe = 2147483647
+        break
+      case "bigint":
+        safe = Number.MAX_SAFE_INTEGER
+        break
+      case "decimal":
+      case "numeric":
+      case "real":
+        safe = 131072
+        break
+      }
+    }
+
+    // Set the min/max based on the safe max/min size.
+    const min = attribute.hasOwnProperty("min") ? attribute.min : -safe
+    const max = attribute.hasOwnProperty("max") ? attribute.max : safe
 
     // If it's a float, generate that.
     if (attribute.type === "float" || attribute.float) {
