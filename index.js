@@ -146,13 +146,13 @@ class Multicolour_Seed {
             // If it has a model association grab a random one.
             if (attribute.model) {
               model.update({ id: created_model.id }, {
-                [attribute.model]: Random.pick(engine, mapped_created.get(attribute.model)).id
+                [attribute_name]: Random.pick(engine, mapped_created.get(attribute.model)).id
               }, () => {})
             }
             // Otherwise, grab a few random ones.
             else if (attribute.collection) {
               model.update({ id: created_model.id }, {
-                [attribute.collection]: [
+                [attribute_name]: [
                   Random.pick(engine, mapped_created.get(attribute.collection)).id,
                   Random.pick(engine, mapped_created.get(attribute.collection)).id,
                   Random.pick(engine, mapped_created.get(attribute.collection)).id

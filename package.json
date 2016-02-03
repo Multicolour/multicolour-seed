@@ -1,6 +1,6 @@
 {
   "name": "multicolour-seed",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Seed your development environment with dummy data randomly generated.",
   "main": "index.js",
   "scripts": {
