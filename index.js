@@ -39,6 +39,8 @@ class Multicolour_Seed {
 
     // When the server starts, try and seed.
     multicolour.on("server_starting", () => {
+    // When the database has started, try seeding.
+    multicolour.on("database_started", () => {
       // If we're not in development mode, do NOT
       // seed the database, that would be bad mkay?
       if (!process.env.NODE_ENV || process.env.NODE_ENV.toLowerCase() !== "development") {
