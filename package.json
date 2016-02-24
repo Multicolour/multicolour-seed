@@ -1,6 +1,6 @@
 {
   "name": "multicolour-seed",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Seed your development environment with dummy data randomly generated.",
   "main": "index.js",
   "scripts": {
@@ -8,16 +8,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/newworldcode/multicolour-seed.git"
+    "url": "git+https://github.com/Multicolour/multicolour-seed.git"
   },
-  "homepage": "https://github.com/newworldcode/multicolour-seed#readme",
+  "homepage": "https://github.com/Multicolour/multicolour-seed#readme",
   "bugs": {
-    "url": "https://github.com/newworldcode/multicolour-seed/issues"
+    "url": "https://github.com/Multicolour/multicolour-seed/issues"
   },
   "author": "newworldcode",
   "license": "MIT",
   "dependencies": {
     "async": "^1.5.2",
+    "colors": "^1.1.2",
     "random-js": "^1.0.8"
   }
 }

@@ -4,6 +4,7 @@
 // the basic native Math engine, randomness
 // isn't really important here.
 const Random = require("random-js")
+const colours = require("colors/safe")
 const engine = Random.engines.nativeMath
 
 // Get Async.
@@ -37,20 +38,18 @@ class Multicolour_Seed {
   register(multicolour) {
     multicolour.reply("seeder", this)
 
-    // When the server starts, try and seed.
-    multicolour.on("server_starting", () => {
     // When the database has started, try seeding.
     multicolour.on("database_started", () => {
       // If we're not in development mode, do NOT
       // seed the database, that would be bad mkay?
       if (!process.env.NODE_ENV || process.env.NODE_ENV.toLowerCase() !== "development") {
         /* eslint-disable */
-        console.error(`NODE_ENV is not "development", not seeding the database`)
+        console.error(colours.red(`NODE_ENV is not "development", not seeding the database`))
         /* eslint-enable */
       }
       else {
         /* eslint-disable */
-        console.log("- Seeding the database with fake data.")
+        console.log(colours.blue("- Seeding the database with fake data."))
         /* eslint-enable */
         // Otherwise, get the models and seed the
         // database with some random stuff.
@@ -107,8 +106,8 @@ class Multicolour_Seed {
     Async.parallel(tasks, (err, created) => {
       if (err) {
         /* eslint-disable */
-        console.error("- SEED - Finished seeding the database with an error")
-        console.error("- SEED - ", err)
+        console.error(colours.red("- SEED - Finished seeding the database with an error"))
+        console.error(colours.red("- SEED - "), err)
         /* eslint-enable */
       }
       else {
@@ -159,7 +158,7 @@ class Multicolour_Seed {
                   Random.pick(engine, mapped_created.get(attribute.collection)).id,
                   Random.pick(engine, mapped_created.get(attribute.collection)).id
                 ]
-              }, () => {})
+              }, () => console.log(colours.rainbow("- SEED - Finished seeding database with random data.")))
             }
           })
       })
@@ -191,8 +190,11 @@ class Multicolour_Seed {
         return
       }
 
+      // Does it have a type or is it a type.
+      const type = definition[attribute_name].type ? definition[attribute_name].type.toLowerCase() : definition[attribute_name]
+
       // Do something different per type.
-      switch (definition[attribute_name].type.toLowerCase()) {
+      switch (type) {
       case "email":
       case "string":
         payload[attribute_name] = this.generate_string(definition[attribute_name])
