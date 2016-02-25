@@ -158,7 +158,7 @@ class Multicolour_Seed {
                   Random.pick(engine, mapped_created.get(attribute.collection)).id,
                   Random.pick(engine, mapped_created.get(attribute.collection)).id
                 ]
-              }, () => console.log(colours.rainbow("- SEED - Finished seeding database with random data.")))
+              }, () => {})
             }
           })
       })
