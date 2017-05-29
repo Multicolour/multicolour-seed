@@ -1,5 +1,7 @@
 # Multicolour Seed
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/Multicolour/multicolour-seed.svg)](https://greenkeeper.io/)
+
 `npm i --save multicolour-seed`
 
 Seed your development environment with randomly generated dummy data.
