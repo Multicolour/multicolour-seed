@@ -17,7 +17,7 @@
   "author": "newworldcode",
   "license": "MIT",
   "dependencies": {
-    "async": "^1.5.2",
+    "async": "^2.4.1",
     "colors": "^1.1.2",
     "random-js": "^1.0.8"
   }
